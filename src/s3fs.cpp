@@ -92,9 +92,11 @@ bool pathrequeststyle             = false;
 bool is_specified_endpoint        = false;
 std::string program_name;
 std::string service_path          = "/";
-std::string host                  = "http://s3.amazonaws.com";
+//std::string host                  = "http://s3.amazonaws.com";
+std::string host                  = "http://s3.amazonaws.com.cn";
 std::string bucket                = "";
-std::string endpoint              = "us-east-1";
+//std::string endpoint              = "us-east-1";
+std::string endpoint              = "cn-north-1";
 
 //-------------------------------------------------------------------
 // Static valiables
@@ -3592,6 +3594,8 @@ static int s3fs_check_service(void)
 {
   FPRN("check services.");
 
+  FPRN("check services, host = %s", host.c_str());
+
   // At first time for access S3, we check IAM role if it sets.
   if(!S3fsCurl::CheckIAMCredentialUpdate()){
     fprintf(stderr, "%s: Failed to check IAM role name(%s).\n", program_name.c_str(), S3fsCurl::GetIAMRole());
@@ -3604,6 +3608,7 @@ static int s3fs_check_service(void)
     // get response code
     long responseCode = s3fscurl.GetLastResponseCode();
 
+    FPRN("check services, responseCode = %d", responseCode);
     // check wrong endpoint, and automatically switch endpoint
     if(responseCode == 400 && !is_specified_endpoint){
       // check region error
@@ -3615,11 +3620,12 @@ static int s3fs_check_service(void)
         FPRN("Could not connect wrong region %s, so retry to connect region %s.", endpoint.c_str(), expectregion.c_str());
         endpoint = expectregion;
         if(S3fsCurl::IsSignatureV4()){
-            if(host == "http://s3.amazonaws.com"){
+            if(host == "http://s3.amazonaws.com.cn"){
                 host = "http://s3-" + endpoint + ".amazonaws.com";
-            }else if(host == "https://s3.amazonaws.com"){
+            }else if(host == "https://s3.amazonaws.com.cn"){
                 host = "https://s3-" + endpoint + ".amazonaws.com";
             }
+            FPRN("s3 host = %s", host.c_str());
         }
 
         // retry to check with new endpoint
